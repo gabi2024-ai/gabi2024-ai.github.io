@@ -119,7 +119,7 @@
 
     #mapa {
       width: 100%;
-      height: 720px;
+      height: 780px;
     }
 
     #barras {
@@ -166,7 +166,7 @@
       }
 
       #mapa {
-        height: 560px;
+        height: 620px;
       }
     }
   </style>
@@ -178,6 +178,7 @@
       <p class="subtitulo">
         En el consolidado anual de paraderos, comunas grandes como Puente Alto y Maipú lideran en cantidad total,
         pero al relativizar por superficie la mayor densidad aparece en comunas urbanas compactas del eje sur-poniente y centro de Santiago.
+        El mapa usa una paleta cálida por niveles y abreviaturas comunales para facilitar la lectura del territorio completo.
       </p>
     </div>
 
@@ -206,6 +207,9 @@
           La variable principal es la densidad de paraderos únicos por km². El mapa permite leer el patrón territorial completo y no solo el ranking.
         </p>
         <div id="mapa"></div>
+        <div class="nota">
+          <strong>Siglas en el mapa:</strong> se muestran abreviaturas comunales para mejorar la legibilidad sin perder la vista completa de Santiago.
+        </div>
       </section>
 
       <section class="tarjeta">
@@ -235,6 +239,7 @@
     // -----------------------------
     const datosComunas = [{"comuna": "SAN RAMÓN", "comuna_titulo": "San Ramón", "paraderos_unicos": 206, "area_km2": 9.0562797521, "densidad_por_km2": 22.746647148596757}, {"comuna": "LO PRADO", "comuna_titulo": "Lo Prado", "paraderos_unicos": 188, "area_km2": 9.4129593278, "densidad_por_km2": 19.97246492341314}, {"comuna": "CONCHALÍ", "comuna_titulo": "Conchalí", "paraderos_unicos": 315, "area_km2": 15.8026659189, "densidad_por_km2": 19.933345526419043}, {"comuna": "LO ESPEJO", "comuna_titulo": "Lo Espejo", "paraderos_unicos": 215, "area_km2": 11.804789592599999, "densidad_por_km2": 18.212946390402063}, {"comuna": "SANTIAGO", "comuna_titulo": "Santiago", "paraderos_unicos": 575, "area_km2": 33.3767837727, "densidad_por_km2": 17.227543669750226}, {"comuna": "LA GRANJA", "comuna_titulo": "La Granja", "paraderos_unicos": 248, "area_km2": 14.5198779967, "densidad_por_km2": 17.0800333209662}, {"comuna": "SAN JOAQUÍN", "comuna_titulo": "San Joaquín", "paraderos_unicos": 241, "area_km2": 14.243413420600001, "densidad_por_km2": 16.920101445026223}, {"comuna": "CERRO NAVIA", "comuna_titulo": "Cerro Navia", "paraderos_unicos": 261, "area_km2": 16.1069276958, "densidad_por_km2": 16.204207588766767}, {"comuna": "LA CISTERNA", "comuna_titulo": "La Cisterna", "paraderos_unicos": 234, "area_km2": 14.5418465798, "densidad_por_km2": 16.091491456459742}, {"comuna": "QUINTA NORMAL", "comuna_titulo": "Quinta Normal", "paraderos_unicos": 272, "area_km2": 17.0842994672, "densidad_por_km2": 15.9210508175773}, {"comuna": "MACUL", "comuna_titulo": "Macul", "paraderos_unicos": 274, "area_km2": 18.4478773332, "densidad_por_km2": 14.852657303119193}, {"comuna": "ÑUÑOA", "comuna_titulo": "Ñuñoa", "paraderos_unicos": 361, "area_km2": 24.3677202403, "densidad_por_km2": 14.814680915573234}, {"comuna": "ESTACIÓN CENTRAL", "comuna_titulo": "Estación Central", "paraderos_unicos": 307, "area_km2": 21.220542643599998, "densidad_por_km2": 14.467113549171636}, {"comuna": "PEDRO AGUIRRE CERDA", "comuna_titulo": "Pedro Aguirre Cerda", "paraderos_unicos": 177, "area_km2": 12.258083387900001, "densidad_por_km2": 14.439451454108832}, {"comuna": "RECOLETA", "comuna_titulo": "Recoleta", "paraderos_unicos": 325, "area_km2": 22.5295736344, "densidad_por_km2": 14.425483822905703}, {"comuna": "INDEPENDENCIA", "comuna_titulo": "Independencia", "paraderos_unicos": 149, "area_km2": 10.6863683225, "densidad_por_km2": 13.942996863235807}, {"comuna": "SAN MIGUEL", "comuna_titulo": "San Miguel", "paraderos_unicos": 179, "area_km2": 13.8953811211, "densidad_por_km2": 12.88197843873388}, {"comuna": "EL BOSQUE", "comuna_titulo": "El Bosque", "paraderos_unicos": 262, "area_km2": 20.6089871951, "densidad_por_km2": 12.712900324490144}, {"comuna": "CERRILLOS", "comuna_titulo": "Cerrillos", "paraderos_unicos": 291, "area_km2": 23.9622513995, "densidad_por_km2": 12.144100950634048}, {"comuna": "PROVIDENCIA", "comuna_titulo": "Providencia", "paraderos_unicos": 243, "area_km2": 20.730831438299997, "densidad_por_km2": 11.721671690941445}, {"comuna": "LA PINTANA", "comuna_titulo": "La Pintana", "paraderos_unicos": 393, "area_km2": 44.063102067, "densidad_por_km2": 8.91902706719162}, {"comuna": "RENCA", "comuna_titulo": "Renca", "paraderos_unicos": 293, "area_km2": 34.0712716529, "densidad_por_km2": 8.599620318986863}, {"comuna": "LA REINA", "comuna_titulo": "La Reina", "paraderos_unicos": 264, "area_km2": 33.615096951700004, "densidad_por_km2": 7.853614118065152}, {"comuna": "PUENTE ALTO", "comuna_titulo": "Puente Alto", "paraderos_unicos": 983, "area_km2": 126.944640332, "densidad_por_km2": 7.743532908747837}, {"comuna": "LA FLORIDA", "comuna_titulo": "La Florida", "paraderos_unicos": 739, "area_km2": 102.52450067, "densidad_por_km2": 7.208033154715388}, {"comuna": "PEÑALOLÉN", "comuna_titulo": "Peñalolén", "paraderos_unicos": 416, "area_km2": 77.0927069478, "densidad_por_km2": 5.396100571246985}, {"comuna": "QUILICURA", "comuna_titulo": "Quilicura", "paraderos_unicos": 402, "area_km2": 81.5280202769, "densidad_por_km2": 4.930820086574602}, {"comuna": "VITACURA", "comuna_titulo": "Vitacura", "paraderos_unicos": 192, "area_km2": 41.234129055299995, "densidad_por_km2": 4.656336981011642}, {"comuna": "MAIPÚ", "comuna_titulo": "Maipú", "paraderos_unicos": 870, "area_km2": 199.08756672299998, "densidad_por_km2": 4.369936376843023}, {"comuna": "HUECHURABA", "comuna_titulo": "Huechuraba", "paraderos_unicos": 208, "area_km2": 64.3196283659, "densidad_por_km2": 3.233849530608828}, {"comuna": "LAS CONDES", "comuna_titulo": "Las Condes", "paraderos_unicos": 455, "area_km2": 141.665818383, "densidad_por_km2": 3.211783937674272}, {"comuna": "SAN BERNARDO", "comuna_titulo": "San Bernardo", "paraderos_unicos": 623, "area_km2": 222.758600127, "densidad_por_km2": 2.7967494841717127}, {"comuna": "PUDAHUEL", "comuna_titulo": "Pudahuel", "paraderos_unicos": 536, "area_km2": 285.185488351, "densidad_por_km2": 1.8794785215028298}, {"comuna": "PADRE HURTADO", "comuna_titulo": "Padre Hurtado", "paraderos_unicos": 50, "area_km2": 116.36434464599999, "densidad_por_km2": 0.4296848845933731}, {"comuna": "LO BARNECHEA", "comuna_titulo": "Lo Barnechea", "paraderos_unicos": 207, "area_km2": 1469.67672909, "densidad_por_km2": 0.14084730056804468}, {"comuna": "LAMPA", "comuna_titulo": "Lampa", "paraderos_unicos": 62, "area_km2": 644.966548044, "densidad_por_km2": 0.09612901659478054}, {"comuna": "PIRQUE", "comuna_titulo": "Pirque", "paraderos_unicos": 26, "area_km2": 644.688715664, "densidad_por_km2": 0.04032954101456729}, {"comuna": "BUIN", "comuna_titulo": "Buin", "paraderos_unicos": 4, "area_km2": 315.032979677, "densidad_por_km2": 0.01269708334695992}, {"comuna": "COLINA", "comuna_titulo": "Colina", "paraderos_unicos": 9, "area_km2": 1386.96785908, "densidad_por_km2": 0.006488975170606951}];
     const geojsonComunas = {"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {"Comuna": "SAN JOAQUÍN"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.6234, -33.4733], [-70.6112, -33.513], [-70.6365, -33.5187], [-70.6419, -33.4768], [-70.6234, -33.4733]]]}}, {"type": "Feature", "properties": {"Comuna": "SAN MIGUEL"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.6365, -33.5187], [-70.6712, -33.5106], [-70.655, -33.4767], [-70.6419, -33.4768], [-70.6365, -33.5187]]]}}, {"type": "Feature", "properties": {"Comuna": "SAN RAMÓN"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.6381, -33.5186], [-70.6365, -33.5187], [-70.631, -33.558], [-70.6547, -33.555], [-70.6381, -33.5186]]]}}, {"type": "Feature", "properties": {"Comuna": "INDEPENDENCIA"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.6581, -33.3991], [-70.6501, -33.4176], [-70.6516, -33.4321], [-70.6819, -33.403], [-70.6581, -33.3991]]]}}, {"type": "Feature", "properties": {"Comuna": "LA CISTERNA"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.6528, -33.5476], [-70.6857, -33.5389], [-70.6712, -33.5106], [-70.6446, -33.5173], [-70.6528, -33.5476]]]}}, {"type": "Feature", "properties": {"Comuna": "PEÑALOLÉN"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.5417, -33.5125], [-70.59, -33.5101], [-70.5722, -33.459], [-70.4869, -33.4617], [-70.4379, -33.4901], [-70.5417, -33.5125]]]}}, {"type": "Feature", "properties": {"Comuna": "PROVIDENCIA"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.5848, -33.4312], [-70.5927, -33.4477], [-70.6315, -33.4498], [-70.6145, -33.4091], [-70.5848, -33.4312]]]}}, {"type": "Feature", "properties": {"Comuna": "LA REINA"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.539, -33.4289], [-70.5045, -33.4381], [-70.4869, -33.4617], [-70.5724, -33.4589], [-70.5844, -33.4317], [-70.539, -33.4289]]]}}, {"type": "Feature", "properties": {"Comuna": "COLINA"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.7814, -33.185], [-70.7922, -33.1721], [-70.7343, -33.1643], [-70.7704, -32.9837], [-70.7224, -32.9535], [-70.5956, -32.9467], [-70.5086, -33.0893], [-70.4346, -33.0213], [-70.3994, -33.0342], [-70.3735, -33.1057], [-70.4283, -33.1303], [-70.4732, -33.2195], [-70.5579, -33.2415], [-70.5965, -33.3378], [-70.7182, -33.3258], [-70.7814, -33.185]]]}}, {"type": "Feature", "properties": {"Comuna": "SANTIAGO"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.6517, -33.4321], [-70.6245, -33.4699], [-70.6809, -33.4784], [-70.6915, -33.4395], [-70.6517, -33.4321]]]}}, {"type": "Feature", "properties": {"Comuna": "LAMPA"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.7943, -33.1718], [-70.7188, -33.3246], [-70.7978, -33.3384], [-70.8384, -33.3851], [-70.9622, -33.3794], [-71.0034, -33.3291], [-70.9684, -33.29], [-70.9933, -33.1776], [-70.8922, -33.1813], [-70.8829, -33.2288], [-70.8571, -33.1814], [-70.7943, -33.1718]]]}}, {"type": "Feature", "properties": {"Comuna": "PIRQUE"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.4438, -33.5825], [-70.4069, -33.647], [-70.4409, -33.6834], [-70.4005, -33.7119], [-70.4037, -33.8143], [-70.4278, -33.8516], [-70.4735, -33.8627], [-70.4867, -33.8307], [-70.5246, -33.8325], [-70.5355, -33.8003], [-70.5955, -33.7815], [-70.6558, -33.6757], [-70.6299, -33.6415], [-70.4438, -33.5825]]]}}, {"type": "Feature", "properties": {"Comuna": "PUENTE ALTO"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.5046, -33.5463], [-70.486, -33.546], [-70.4987, -33.6081], [-70.6312, -33.6428], [-70.6112, -33.5705], [-70.5046, -33.5463]]]}}, {"type": "Feature", "properties": {"Comuna": "HUECHURABA"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.6892, -33.3662], [-70.6675, -33.3281], [-70.5825, -33.3509], [-70.6105, -33.405], [-70.6892, -33.3662]]]}}, {"type": "Feature", "properties": {"Comuna": "SAN BERNARDO"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.742, -33.6632], [-70.7674, -33.5719], [-70.7263, -33.5239], [-70.6853, -33.5391], [-70.7007, -33.5729], [-70.6632, -33.5851], [-70.6312, -33.6428], [-70.71, -33.6655], [-70.821, -33.7542], [-70.8024, -33.6684], [-70.742, -33.6632]]]}}, {"type": "Feature", "properties": {"Comuna": "CERRILLOS"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.7122, -33.482], [-70.6855, -33.4786], [-70.7067, -33.5312], [-70.74, -33.5101], [-70.7122, -33.482]]]}}, {"type": "Feature", "properties": {"Comuna": "CERRO NAVIA"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.7193, -33.4132], [-70.7224, -33.4389], [-70.7821, -33.4169], [-70.7595, -33.4123], [-70.7193, -33.4132]]]}}, {"type": "Feature", "properties": {"Comuna": "VITACURA"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.5794, -33.352], [-70.5175, -33.3727], [-70.6145, -33.4091], [-70.601, -33.3627], [-70.5794, -33.352]]]}}, {"type": "Feature", "properties": {"Comuna": "CONCHALÍ"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.6631, -33.3992], [-70.6819, -33.403], [-70.7003, -33.3661], [-70.6568, -33.3765], [-70.6631, -33.3992]]]}}, {"type": "Feature", "properties": {"Comuna": "EL BOSQUE"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.6632, -33.5851], [-70.7007, -33.5729], [-70.6853, -33.5391], [-70.6531, -33.5487], [-70.6632, -33.5851]]]}}, {"type": "Feature", "properties": {"Comuna": "ESTACIÓN CENTRAL"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.6794, -33.446], [-70.672, -33.4765], [-70.7338, -33.4696], [-70.7312, -33.4549], [-70.6794, -33.446]]]}}, {"type": "Feature", "properties": {"Comuna": "LA FLORIDA"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.4394, -33.492], [-70.4869, -33.5432], [-70.6112, -33.5705], [-70.6136, -33.5083], [-70.4394, -33.492]]]}}, {"type": "Feature", "properties": {"Comuna": "LA GRANJA"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.6365, -33.5188], [-70.6112, -33.513], [-70.6122, -33.5556], [-70.6307, -33.5598], [-70.6365, -33.5188]]]}}, {"type": "Feature", "properties": {"Comuna": "LA PINTANA"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.6324, -33.5581], [-70.6122, -33.5556], [-70.6059, -33.602], [-70.6286, -33.6277], [-70.6706, -33.6074], [-70.6549, -33.5549], [-70.6324, -33.5581]]]}}, {"type": "Feature", "properties": {"Comuna": "LAS CONDES"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.5323, -33.3821], [-70.4759, -33.3679], [-70.4309, -33.4387], [-70.4391, -33.4866], [-70.5081, -33.4361], [-70.6078, -33.4154], [-70.5323, -33.3821]]]}}, {"type": "Feature", "properties": {"Comuna": "LO BARNECHEA"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.2173, -33.2221], [-70.1772, -33.3565], [-70.2441, -33.4358], [-70.3514, -33.4916], [-70.4344, -33.4809], [-70.434, -33.4287], [-70.4765, -33.3673], [-70.5406, -33.3702], [-70.596, -33.337], [-70.6045, -33.3106], [-70.5579, -33.2415], [-70.4732, -33.2195], [-70.4283, -33.1303], [-70.3735, -33.1057], [-70.3373, -33.0965], [-70.2719, -33.1315], [-70.2669, -33.1815], [-70.2173, -33.2221]]]}}, {"type": "Feature", "properties": {"Comuna": "LO ESPEJO"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.6941, -33.5024], [-70.6712, -33.5106], [-70.6857, -33.5389], [-70.7067, -33.5312], [-70.6941, -33.5024]]]}}, {"type": "Feature", "properties": {"Comuna": "LO PRADO"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.7055, -33.4571], [-70.7389, -33.4534], [-70.7408, -33.4363], [-70.707, -33.438], [-70.7055, -33.4571]]]}}, {"type": "Feature", "properties": {"Comuna": "MACUL"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.5768, -33.4702], [-70.59, -33.5101], [-70.6136, -33.5083], [-70.623, -33.4749], [-70.5768, -33.4702]]]}}, {"type": "Feature", "properties": {"Comuna": "MAIPÚ"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.765, -33.4592], [-70.7222, -33.4734], [-70.74, -33.5101], [-70.7185, -33.514], [-70.7674, -33.5719], [-70.8078, -33.5283], [-70.852, -33.5377], [-70.93, -33.5057], [-70.8949, -33.4784], [-70.765, -33.4592]]]}}, {"type": "Feature", "properties": {"Comuna": "ÑUÑOA"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.5768, -33.4702], [-70.623, -33.4749], [-70.6315, -33.4498], [-70.5822, -33.4337], [-70.5768, -33.4702]]]}}, {"type": "Feature", "properties": {"Comuna": "PEDRO AGUIRRE CERDA"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.6712, -33.5106], [-70.6954, -33.5024], [-70.6856, -33.4781], [-70.655, -33.4767], [-70.6712, -33.5106]]]}}, {"type": "Feature", "properties": {"Comuna": "PUDAHUEL"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.7897, -33.3604], [-70.7565, -33.3837], [-70.7821, -33.4169], [-70.7407, -33.4299], [-70.7314, -33.4681], [-70.8064, -33.4609], [-70.9214, -33.4883], [-70.948, -33.4696], [-70.9436, -33.3815], [-70.8391, -33.3852], [-70.7897, -33.3604]]]}}, {"type": "Feature", "properties": {"Comuna": "QUILICURA"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.6957, -33.3829], [-70.7498, -33.3889], [-70.7978, -33.3384], [-70.6981, -33.3209], [-70.6957, -33.3829]]]}}, {"type": "Feature", "properties": {"Comuna": "QUINTA NORMAL"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.7052, -33.4076], [-70.6713, -33.4265], [-70.6923, -33.4479], [-70.7215, -33.4366], [-70.7052, -33.4076]]]}}, {"type": "Feature", "properties": {"Comuna": "RECOLETA"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.6516, -33.4321], [-70.6582, -33.3997], [-70.6568, -33.3765], [-70.6105, -33.405], [-70.6516, -33.4321]]]}}, {"type": "Feature", "properties": {"Comuna": "RENCA"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.6961, -33.382], [-70.6713, -33.4265], [-70.7822, -33.4137], [-70.7565, -33.3837], [-70.6961, -33.382]]]}}, {"type": "Feature", "properties": {"Comuna": "PADRE HURTADO"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.8494, -33.5768], [-70.9353, -33.5881], [-70.9484, -33.5606], [-70.9197, -33.5112], [-70.8517, -33.5378], [-70.8078, -33.5283], [-70.7786, -33.5691], [-70.819, -33.5986], [-70.8494, -33.5768]]]}}, {"type": "Feature", "properties": {"Comuna": "BUIN"}, "geometry": {"type": "Polygon", "coordinates": [[[-70.6331, -33.6499], [-70.6558, -33.6757], [-70.6144, -33.7384], [-70.6881, -33.7592], [-70.6906, -33.791], [-70.751, -33.7728], [-70.7847, -33.8346], [-70.8951, -33.8054], [-70.71, -33.6655], [-70.6331, -33.6499]]]}}]};
+    const datosEtiquetas = [{"comuna": "SAN RAMÓN", "texto": "SRA", "lon": -70.640191, "lat": -33.53385}, {"comuna": "LO PRADO", "texto": "LPR", "lon": -70.723075, "lat": -33.4417}, {"comuna": "CONCHALÍ", "texto": "CON", "lon": -70.674702, "lat": -33.38385}, {"comuna": "LO ESPEJO", "texto": "LES", "lon": -70.689336, "lat": -33.5249}, {"comuna": "SANTIAGO", "texto": "STG", "lon": -70.661398, "lat": -33.4587}, {"comuna": "LA GRANJA", "texto": "LGR", "lon": -70.625833, "lat": -33.5332}, {"comuna": "SAN JOAQUÍN", "texto": "SJO", "lon": -70.634165, "lat": -33.4949}, {"comuna": "CERRO NAVIA", "texto": "CNA", "lon": -70.741662, "lat": -33.4279}, {"comuna": "LA CISTERNA", "texto": "LCI", "lon": -70.659845, "lat": -33.5341}, {"comuna": "QUINTA NORMAL", "texto": "QN", "lon": -70.704459, "lat": -33.43355}, {"comuna": "MACUL", "texto": "MAC", "lon": -70.59409, "lat": -33.4976}, {"comuna": "ÑUÑOA", "texto": "NUN", "lon": -70.599177, "lat": -33.462}, {"comuna": "ESTACIÓN CENTRAL", "texto": "EC", "lon": -70.704979, "lat": -33.46925}, {"comuna": "PEDRO AGUIRRE CERDA", "texto": "PAC", "lon": -70.679988, "lat": -33.49225}, {"comuna": "RECOLETA", "texto": "REC", "lon": -70.642233, "lat": -33.39735}, {"comuna": "INDEPENDENCIA", "texto": "IND", "lon": -70.659778, "lat": -33.4093}, {"comuna": "SAN MIGUEL", "texto": "SMI", "lon": -70.647423, "lat": -33.4927}, {"comuna": "EL BOSQUE", "texto": "EBO", "lon": -70.675822, "lat": -33.5648}, {"comuna": "CERRILLOS", "texto": "CER", "lon": -70.709317, "lat": -33.49605}, {"comuna": "PROVIDENCIA", "texto": "PRO", "lon": -70.609383, "lat": -33.41615}, {"comuna": "LA PINTANA", "texto": "LPI", "lon": -70.635651, "lat": -33.58005}, {"comuna": "RENCA", "texto": "REN", "lon": -70.728072, "lat": -33.3987}, {"comuna": "LA REINA", "texto": "LRE", "lon": -70.538866, "lat": -33.4465}, {"comuna": "PUENTE ALTO", "texto": "PAL", "lon": -70.555628, "lat": -33.5893}, {"comuna": "LA FLORIDA", "texto": "LFL", "lon": -70.533819, "lat": -33.52475}, {"comuna": "PEÑALOLÉN", "texto": "PNL", "lon": -70.515243, "lat": -33.4719}, {"comuna": "QUILICURA", "texto": "QUI", "lon": -70.736606, "lat": -33.36065}, {"comuna": "VITACURA", "texto": "VIT", "lon": -70.589602, "lat": -33.3929}, {"comuna": "MAIPÚ", "texto": "MAI", "lon": -70.80844, "lat": -33.52115}, {"comuna": "HUECHURABA", "texto": "HUE", "lon": -70.619155, "lat": -33.3836}, {"comuna": "LAS CONDES", "texto": "LCO", "lon": -70.49354, "lat": -33.42675}, {"comuna": "SAN BERNARDO", "texto": "SBE", "lon": -70.701451, "lat": -33.61395}, {"comuna": "PUDAHUEL", "texto": "PUD", "lon": -70.853546, "lat": -33.4234}, {"comuna": "PADRE HURTADO", "texto": "PHU", "lon": -70.86731, "lat": -33.5492}, {"comuna": "LO BARNECHEA", "texto": "LBA", "lon": -70.391202, "lat": -33.27605}, {"comuna": "LAMPA", "texto": "LAM", "lon": -70.863097, "lat": -33.2594}, {"comuna": "PIRQUE", "texto": "PIR", "lon": -70.508461, "lat": -33.7467}, {"comuna": "BUIN", "texto": "BUI", "lon": -70.735732, "lat": -33.7488}, {"comuna": "COLINA", "texto": "COL", "lon": -70.587278, "lat": -33.1473}];
 
     // -----------------------------
     // Utilidades para formato
@@ -253,59 +258,108 @@
     // -----------------------------
     // Mapa coroplético
     // -----------------------------
-    const textoHover = datosComunas.map(d =>
+    
+const textoHover = datosComunas.map(d =>
       `<b>${d.comuna_titulo}</b><br>` +
       `Paraderos únicos: ${formatearNumero(d.paraderos_unicos)}<br>` +
       `Superficie: ${formatearDecimal(d.area_km2)} km²<br>` +
       `Densidad: ${formatearDecimal(d.densidad_por_km2)} par./km²`
     );
 
+    function clasificarDensidad(valor) {
+      if (valor < 1) return 0;
+      if (valor < 5) return 1;
+      if (valor < 10) return 2;
+      if (valor < 15) return 3;
+      return 4;
+    }
+
+    const clasesDensidad = datosComunas.map(d => clasificarDensidad(d.densidad_por_km2));
+
+    const escalaDiscreta = [
+      [0.00, '#efe3a4'], [0.19999, '#efe3a4'],
+      [0.20, '#efc86a'], [0.39999, '#efc86a'],
+      [0.40, '#edae2f'], [0.59999, '#edae2f'],
+      [0.60, '#d97a1d'], [0.79999, '#d97a1d'],
+      [0.80, '#b84d1b'], [1.00, '#b84d1b']
+    ];
+
+    const trazaMapaBase = {
+      type: 'choropleth',
+      geojson: geojsonComunas,
+      featureidkey: 'properties.Comuna',
+      locations: geojsonComunas.features.map(f => f.properties.Comuna),
+      z: geojsonComunas.features.map(() => 0),
+      colorscale: [[0, '#f7f3e6'], [1, '#f7f3e6']],
+      showscale: false,
+      hoverinfo: 'skip',
+      marker: {
+        line: {
+          color: '#ffffff',
+          width: 1.0
+        }
+      }
+    };
+
     const trazaMapa = {
       type: 'choropleth',
       geojson: geojsonComunas,
       featureidkey: 'properties.Comuna',
       locations: datosComunas.map(d => d.comuna),
-      z: datosComunas.map(d => d.densidad_por_km2),
+      z: clasesDensidad,
       text: textoHover,
       hoverinfo: 'text',
-      colorscale: [
-        [0.00, '#edf4fb'],
-        [0.20, '#d7e7f4'],
-        [0.40, '#b6d4ea'],
-        [0.60, '#79aed5'],
-        [0.80, '#3d82bc'],
-        [1.00, '#0f4c81']
-      ],
+      zmin: 0,
+      zmax: 4,
+      colorscale: escalaDiscreta,
       marker: {
         line: {
           color: '#ffffff',
-          width: 0.9
+          width: 1.15
         }
       },
       colorbar: {
         title: {
-          text: 'Paraderos<br>por km²',
+          text: 'Densidad<br>par./km²',
           side: 'right'
         },
-        thickness: 16,
-        len: 0.65,
+        thickness: 18,
+        len: 0.60,
         x: 0.98,
         y: 0.50,
+        tickmode: 'array',
+        tickvals: [0, 1, 2, 3, 4],
+        ticktext: ['0–1', '1–5', '5–10', '10–15', '15+'],
         tickfont: {
           size: 11
         },
         titlefont: {
           size: 12
-        }
+        },
+        outlinewidth: 0
+      }
+    };
+
+    const trazaEtiquetas = {
+      type: 'scattergeo',
+      mode: 'text',
+      lon: datosEtiquetas.map(d => d.lon),
+      lat: datosEtiquetas.map(d => d.lat),
+      text: datosEtiquetas.map(d => d.texto),
+      hoverinfo: 'skip',
+      textfont: {
+        size: 9,
+        color: '#111827',
+        family: 'Arial Black, Arial, sans-serif'
       }
     };
 
     const layoutMapa = {
-      margin: { t: 10, r: 18, b: 8, l: 8 },
+      margin: { t: 10, r: 22, b: 8, l: 8 },
       paper_bgcolor: '#ffffff',
       plot_bgcolor: '#ffffff',
       geo: {
-        fitbounds: 'locations',
+        fitbounds: 'geojson',
         visible: false,
         projection: { type: 'mercator' },
         bgcolor: '#ffffff'
@@ -319,12 +373,12 @@
           showarrow: false,
           align: 'left',
           font: { size: 12, color: '#4b5563' },
-          text: 'Densidad = paraderos únicos / km²'
+          text: 'Escala por tramos: 0–1, 1–5, 5–10, 10–15 y 15+ paraderos por km²'
         }
       ]
     };
 
-    Plotly.newPlot('mapa', [trazaMapa], layoutMapa, {
+    Plotly.newPlot('mapa', [trazaMapaBase, trazaMapa, trazaEtiquetas], layoutMapa, {
       responsive: true,
       displayModeBar: false,
       staticPlot: true
@@ -338,9 +392,10 @@
       .slice(0, 10)
       .reverse();
 
-    const coloresBarras = top10.map(d => {
+    const coloresBarras = top10.map((d, i) => {
       const top3 = ['SAN RAMÓN', 'LO PRADO', 'CONCHALÍ'];
-      return top3.includes(d.comuna) ? '#2f6b7a' : '#b7bec7';
+      if (top3.includes(d.comuna)) return '#b84d1b';
+      return i >= 6 ? '#efc86a' : '#edae2f';
     });
 
     const trazaBarras = {
@@ -366,7 +421,7 @@
       xaxis: {
         title: 'Paraderos por km²',
         zeroline: false,
-        gridcolor: '#e5e7eb',
+        gridcolor: '#ede7d6',
         tickfont: { size: 11 }
       },
       yaxis: {
