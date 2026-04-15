@@ -207,4 +207,4 @@ plt.tight_layout()
 plt.show()
 
 # Para guardar:
-# plt.savefig("mapa_urbano_santiago_tutorial.png", dpi=300, bbox_inches="tight", facecolor="#e9e9e9")
+plt.savefig("mapa_urbano_santiago_tutorial.png", dpi=300, bbox_inches="tight", facecolor="#e9e9e9")
