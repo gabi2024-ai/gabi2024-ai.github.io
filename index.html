@@ -1,69 +1,74 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Densidad Urbana · Gran Santiago</title>
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Densidad Urbana · Gran Santiago</title>
+<script src="https://cdn.plot.ly/plotly-3.4.0.min.js"></script>
+<link href="styles.css" rel="stylesheet" />
 
-  <script src="https://cdn.plot.ly/plotly-3.4.0.min.js"></script>
 </head>
 <body>
-
 <div id="app">
 
-  <header id="header">
-    <h1>Densidad Urbana · <span>Gran Santiago</span></h1>
-    <span class="header-meta">INE r13_zonas · Zonas censales</span>
-  </header>
+  <div id="topbar">
+    <h1>Densidad Tráfico Urbano · <span>Gran Santiago</span></h1>
 
-  <aside id="sidebar">
-
-    <!-- Stats -->
-    <div class="sidebar-section">
-      <div class="sidebar-label">Resumen general</div>
-      <div class="stat-grid">
-        <div class="stat-card">
-          <div class="val" id="stat-zones">—</div>
-          <div class="lbl">Zonas censales</div>
-        </div>
-        <div class="stat-card">
-          <div class="val" id="stat-comunas">—</div>
-          <div class="lbl">Comunas</div>
-        </div>
-        <div class="stat-card">
-          <div class="val" id="stat-max">—</div>
-          <div class="lbl">Densidad máx.</div>
-        </div>
-        <div class="stat-card">
-          <div class="val" id="stat-avg">—</div>
-          <div class="lbl">Densidad media</div>
-        </div>
+    <div class="stats-row">
+      <div class="stat-pill">
+        <span class="val" id="s-zonas">—</span>
+        <span class="lbl">zonas</span>
+      </div>
+      <div class="stat-pill">
+        <span class="val" id="s-comunas">—</span>
+        <span class="lbl">comunas</span>
+      </div>
+      <div class="stat-pill">
+        <span class="val" id="s-max">—</span>
+        <span class="lbl">máx zonas/km²</span>
+      </div>
+      <div class="stat-pill">
+        <span class="val" id="s-avg">—</span>
+        <span class="lbl">promedio</span>
       </div>
     </div>
 
-    <div id="bar-container">
-      <div class="bar-header">Top comunas · densidad media</div>
-      <div id="bar-chart"></div>
-    </div>
+    <button id="toggle-palette" title="Alternar paleta para daltonismo">
+      <div class="palette-swatch" id="swatch-preview"></div>
+      Paleta daltonismo
+    </button>
+  </div>
 
-    <div id="info-box">
-      <div class="info-empty">← Haz clic en una zona del mapa</div>
-    </div>
 
-  </aside>
-
-  <main id="map-container">
-    <div id="map"></div>
-
+  <div id="map-wrap">
     <div id="loading">
-      <div class="loader-text">Cargando datos geoespaciales…</div>
+      <div class="loader-text">Cargando mapa…</div>
       <div class="loader-bar"></div>
     </div>
 
-    <div id="source">Fuente: INE r13_zonas · Gran Santiago</div>
-  </main>
+    <div id="map"></div>
 
+
+    <div id="hover-panel">
+      <div class="hp-title" id="hp-name">—</div>
+      <div class="hp-row">
+        <span class="hp-label">Densidad</span>
+        <span class="hp-value" id="hp-dens">—</span>
+      </div>
+      <div class="hp-geocod" id="hp-geo"></div>
+    </div>
+
+    <div id="legend">
+      <div class="leg-title">Densidad (zonas/km²)</div>
+      <div class="leg-bar" id="leg-bar"></div>
+      <div class="leg-labels">
+        <span>0</span>
+        <span>5</span>
+        <span>10</span>
+        <span>20+</span>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script src="main.js"></script>
