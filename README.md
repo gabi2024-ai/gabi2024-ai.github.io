@@ -1,5 +1,5 @@
 # gabi2024-ai.github.io
-# Densidad de paraderos por comuna en Santiago
+# Densidad urbana de las zonas censales del Gran Santiago
 
 Visualización estática para la Entrega 1 del proyecto de Visualización de Información.
 
