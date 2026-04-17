@@ -1,3 +1,6 @@
+const MAX_DENSITY = 20;
+const MAP_CENTER = { lon: -70.638, lat: -33.490 };
+
 const PALETTES = {
   default: {
     name: 'Magma',
@@ -42,102 +45,140 @@ const PALETTES = {
   },
 };
 
-let currentPalette = 'default';
-let geojson = null;
 
+let currentPaletteKey = 'default';
+let geoJsonData = null;
 
-function interpolar_color(t, palette) {
+// utils
+function interpolateColor(targetValue, palette) {
   const stops = palette.stops;
-  let lo = stops[0], hi = stops[stops.length - 1];
+  let lowerStop = stops[0];
+  let upperStop = stops[stops.length - 1];
+
+  // Encontrar entre qué par de colores se encuentra el valor
   for (let i = 0; i < stops.length - 1; i++) {
-    if (t >= stops[i].t && t <= stops[i + 1].t) { lo = stops[i]; hi = stops[i + 1]; break; }
+    if (targetValue >= stops[i].t && targetValue <= stops[i + 1].t) { 
+      lowerStop = stops[i]; 
+      upperStop = stops[i + 1]; 
+      break; 
+    }
   }
-  const f = lo.t === hi.t ? 0 : (t - lo.t) / (hi.t - lo.t);
-  const r = Math.round(lo.r + f * (hi.r - lo.r));
-  const g = Math.round(lo.g + f * (hi.g - lo.g));
-  const b = Math.round(lo.b + f * (hi.b - lo.b));
+
+  // Calcular ratio y evitar divisiones por cero
+  const ratio = lowerStop.t === upperStop.t 
+    ? 0 
+    : (targetValue - lowerStop.t) / (upperStop.t - lowerStop.t);
+  
+  const r = Math.round(lowerStop.r + ratio * (upperStop.r - lowerStop.r));
+  const g = Math.round(lowerStop.g + ratio * (upperStop.g - lowerStop.g));
+  const b = Math.round(lowerStop.b + ratio * (upperStop.b - lowerStop.b));
+  
   return `rgb(${r},${g},${b})`;
 }
 
-function build_gradiente(palette) {
-  const s = palette.scale;
-  const stops = s.map(([t, c]) => `${c} ${(t*100).toFixed(0)}%`).join(', ');
-  return `linear-gradient(to right, ${stops})`;
+function generateGradientString(palette) {
+  const colorStopsString = palette.scale
+    .map(([percentage, color]) => `${color} ${(percentage * 100).toFixed(0)}%`)
+    .join(', ');
+    
+  return `linear-gradient(to right, ${colorStopsString})`;
 }
 
-// Stats superior
-function build_stats(gj) {
-  const vals = gj.features.map(f => f.properties.densidad);
-  const comunas = new Set(gj.features.map(f => f.properties.nombre_comuna));
-  document.getElementById('s-zonas').textContent   = gj.features.length.toLocaleString('es-CL');
-  document.getElementById('s-comunas').textContent = comunas.size;
-  document.getElementById('s-max').textContent     = Math.max(...vals).toFixed(1);
-  document.getElementById('s-avg').textContent     = (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(2);
+function calculateCentroid(feature) {
+  const coordinates = feature.geometry.type === 'Polygon'
+    ? feature.geometry.coordinates[0]
+    : feature.geometry.coordinates[0][0];
+    
+  const totalLon = coordinates.reduce((sum, coord) => sum + coord[0], 0);
+  const totalLat = coordinates.reduce((sum, coord) => sum + coord[1], 0);
+  
+  return { 
+    lon: totalLon / coordinates.length, 
+    lat: totalLat / coordinates.length 
+  };
 }
 
+// update de la interfaz
+function renderStatistics(geoJson) {
+  const densities = geoJson.features.map(feature => feature.properties.densidad);
+  const uniqueCommunes = new Set(geoJson.features.map(feature => feature.properties.nombre_comuna));
+  
+  const maxDensity = Math.max(...densities);
+  const averageDensity = densities.reduce((sum, val) => sum + val, 0) / densities.length;
 
-function update_leyenda(palKey) {
-  const pal = PALETTES[palKey];
-  document.getElementById('leg-bar').style.background = build_gradiente(pal);
-
-  const sw = document.getElementById('swatch-preview');
-  sw.innerHTML = pal.preview.map(c =>
-    `<div class="swatch-dot" style="background:${c}"></div>`
-  ).join('');
+  document.getElementById('s-zonas').textContent = geoJson.features.length.toLocaleString('es-CL');
+  document.getElementById('s-comunas').textContent = uniqueCommunes.size;
+  document.getElementById('s-max').textContent = maxDensity.toFixed(1);
+  document.getElementById('s-avg').textContent = averageDensity.toFixed(2);
 }
 
-function build_map(gj, palKey) {
-  const pal = PALETTES[palKey];
-  const ids       = gj.features.map((_, i) => i);
-  const comunas   = gj.features.map(f => f.properties.nombre_comuna);
-  const geocod    = gj.features.map(f => f.properties.geocodigo);
-  const densidades = gj.features.map(f => f.properties.densidad);
+function updateLegend(paletteKey) {
+  const palette = PALETTES[paletteKey];
+  
+  document.getElementById('leg-bar').style.background = generateGradientString(palette);
 
-  const featuresCopy = JSON.parse(JSON.stringify(gj));
-  featuresCopy.features.forEach((f, i) => { f.id = i; });
+  const swatchContainer = document.getElementById('swatch-preview');
+  swatchContainer.innerHTML = palette.preview
+    .map(color => `<div class="swatch-dot" style="background:${color}"></div>`)
+    .join('');
+}
 
-  const ZMAX = 20;
+function buildMap(geoJson, paletteKey) {
+  const palette = PALETTES[paletteKey];
+  const features = geoJson.features;
+  
+  // Extraccion
+  const ids = features.map((_, index) => index);
+  const communeNames = features.map(feature => feature.properties.nombre_comuna);
+  const geocodes = features.map(feature => feature.properties.geocodigo);
+  const densities = features.map(feature => feature.properties.densidad);
 
-  // Calcular centroide de cada feature para las etiquetas
-  function centroid(feature) {
-    const coords = feature.geometry.type === 'Polygon'
-      ? feature.geometry.coordinates[0]
-      : feature.geometry.coordinates[0][0];
-    const lon = coords.reduce((s, c) => s + c[0], 0) / coords.length;
-    const lat = coords.reduce((s, c) => s + c[1], 0) / coords.length;
-    return { lon, lat };
-  }
-
-  // calcular densidad (agrupado por comuna) promedio + centroide medio
-  const comunaMap = {};
-  gj.features.forEach(f => {
-    const nombre = f.properties.nombre_comuna;
-    const dens   = f.properties.densidad;
-    const cen    = centroid(f);
-    if (!comunaMap[nombre]) comunaMap[nombre] = { lons: [], lats: [], dens: [] };
-    comunaMap[nombre].lons.push(cen.lon);
-    comunaMap[nombre].lats.push(cen.lat);
-    comunaMap[nombre].dens.push(dens);
+  // ID para cda feature
+  const clonedGeoJson = JSON.parse(JSON.stringify(geoJson));
+  clonedGeoJson.features.forEach((feature, index) => { 
+    feature.id = index; 
   });
 
-  const labelLons = [], labelLats = [], labelTexts = [];
-  Object.entries(comunaMap).forEach(([nombre, d]) => {
-    const lon  = d.lons.reduce((a,b)=>a+b,0) / d.lons.length;
-    const lat  = d.lats.reduce((a,b)=>a+b,0) / d.lats.length;
-    const avg  = (d.dens.reduce((a,b)=>a+b,0) / d.dens.length).toFixed(1);
-    labelLons.push(lon);
-    labelLats.push(lat);
-    labelTexts.push(`<b>${nombre}</b><br>${avg} z/km²`);
+  // etiquetas por comuna
+  const communeDataMap = {};
+  
+  features.forEach(feature => {
+    const name = feature.properties.nombre_comuna;
+    const density = feature.properties.densidad;
+    const centroid = calculateCentroid(feature);
+    
+    if (!communeDataMap[name]) {
+      communeDataMap[name] = { lons: [], lats: [], densities: [] };
+    }
+    
+    communeDataMap[name].lons.push(centroid.lon);
+    communeDataMap[name].lats.push(centroid.lat);
+    communeDataMap[name].densities.push(density);
   });
 
-  const trazo = {
+  const labelLons = [];
+  const labelLats = [];
+  const labelTexts = [];
+
+  Object.entries(communeDataMap).forEach(([name, data]) => {
+    const avgLon = data.lons.reduce((a, b) => a + b, 0) / data.lons.length;
+    const avgLat = data.lats.reduce((a, b) => a + b, 0) / data.lats.length;
+    const avgDensity = (data.densities.reduce((a, b) => a + b, 0) / data.densities.length).toFixed(1);
+    
+    labelLons.push(avgLon);
+    labelLats.push(avgLat);
+    labelTexts.push(`<b>${name}</b><br>${avgDensity} z/km²`);
+  });
+
+  // --- Configuración de Trazos de Plotly ---
+  const mapTrace = {
     type: 'choroplethmapbox',
-    geojson: featuresCopy,
+    geojson: clonedGeoJson,
     locations: ids,
-    z: densidades,
-    colorscale: pal.scale,
+    z: densities,
+    colorscale: palette.scale,
     zmin: 0,
-    zmax: ZMAX,
+    zmax: MAX_DENSITY,
     marker: {
       opacity: 0.85,
       line: { width: 0.4, color: 'rgba(255,255,255,0.25)' }
@@ -152,12 +193,11 @@ function build_map(gj, palKey) {
       outlinewidth: 0,
       bgcolor: 'rgba(0,0,0,0)',
     },
-    customdata: comunas.map((c, i) => [c, geocod[i], densidades[i]]),
+    customdata: communeNames.map((name, index) => [name, geocodes[index], densities[index]]),
     hovertemplate: '<extra></extra>',
     name: '',
   };
 
-  // Capa de etiquetas de comunas (siempre visibles)
   const etiquetas = {
     type: 'scattermapbox',
     lon: labelLons,
@@ -173,10 +213,10 @@ function build_map(gj, palKey) {
     name: '',
   };
 
-  const layout = {
+  const mapLayout = {
     mapbox: {
-      style: 'carto-positron',
-      center: { lon: -70.638, lat: -33.490 },
+      style: 'carto-positron', // Fondo claro
+      center: MAP_CENTER,
       zoom: 10,
       fitbounds: 'locations',
     },
@@ -186,7 +226,7 @@ function build_map(gj, palKey) {
     font: { family: 'Syne', color: '#1a1730' },
   };
 
-  const config = {
+  const mapConfig = {
     responsive: true,
     displayModeBar: false,
     scrollZoom: false,
@@ -195,61 +235,81 @@ function build_map(gj, palKey) {
     displayLogo: false,
   };
 
-  // Plotly.newPlot('map', [trazo, etiquetas], layout, config);
-  Plotly.newPlot('map', [trazo], layout, config);
+  // Renderizar
+  Plotly.newPlot('map', [mapTrace], mapLayout, mapConfig);
+  // Plotly.newPlot('map', [mapTrace, etiquetas], mapLayout, mapConfig);
 
-  // Bloquear drag completamente despues de renderizar
-  const mapEl = document.getElementById('map');
-  mapEl.addEventListener('mousedown', e => e.stopPropagation(), true);
-  mapEl.addEventListener('touchstart', e => e.stopPropagation(), true);
+  setupMapInteractions();
+}
 
-  const panel  = document.getElementById('hover-panel');
+// Interacción mapa
+function setupMapInteractions() {
+  const mapElement = document.getElementById('map');
+  const hoverPanel = document.getElementById('hover-panel');
 
-  mapEl.on('plotly_hover', (data) => {
-    const pt = data.points[0];
-    if (!pt || pt.customdata === undefined) return;
-    const [comuna, geocodigo, dens] = pt.customdata;
+  // Bloquear drag completamente después de renderizar
+  mapElement.addEventListener('mousedown', event => event.stopPropagation(), true);
+  mapElement.addEventListener('touchstart', event => event.stopPropagation(), true);
+
+  mapElement.on('plotly_hover', (data) => {
+    const point = data.points[0];
+    if (!point || point.customdata === undefined) return;
     
-    document.getElementById('hp-name').textContent = comuna;
-    document.getElementById('hp-dens').textContent = dens.toFixed(3) + ' zonas/km²';
-    document.getElementById('hp-geo').textContent  = geocodigo;
-    panel.classList.add('visible');
+    const [commune, geocode, density] = point.customdata;
+    
+    document.getElementById('hp-name').textContent = commune;
+    document.getElementById('hp-dens').textContent = `${density.toFixed(3)} zonas/km²`;
+    document.getElementById('hp-geo').textContent = geocode;
+    
+    hoverPanel.classList.add('visible');
   });
 
-  mapEl.on('plotly_unhover', () => {
-    panel.classList.remove('visible');
-  });
-}
-
-function setupToggle() {
-  const btn = document.getElementById('toggle-palette');
-  btn.addEventListener('click', () => {
-    currentPalette = currentPalette === 'default' ? 'viridis' : 'default';
-    btn.classList.toggle('active', currentPalette === 'viridis');
-    update_leyenda(currentPalette);
-    rebuildTrace(currentPalette);
+  mapElement.on('plotly_unhover', () => {
+    hoverPanel.classList.remove('visible');
   });
 }
 
-function rebuildTrace(palKey) {
-  const pal = PALETTES[palKey];
-  const ZMAX = 20;
+function setupPaletteToggle() {
+  const toggleButton = document.getElementById('toggle-palette');
+  
+  toggleButton.addEventListener('click', () => {
+    currentPaletteKey = currentPaletteKey === 'default' ? 'viridis' : 'default';
+    
+    toggleButton.classList.toggle('active', currentPaletteKey === 'viridis');
+    updateLegend(currentPaletteKey);
+    updateMapTracePalette(currentPaletteKey);
+  });
+}
+
+function updateMapTracePalette(paletteKey) {
+  const palette = PALETTES[paletteKey];
+  
   Plotly.restyle('map', {
-    colorscale: [pal.scale],
-    zmax: [ZMAX],
+    colorscale: [palette.scale],
+    zmax: [MAX_DENSITY],
   }, [0]);
 }
 
-async function init() {
-  const res = await fetch('zonas_densidad.geojson');
-  geojson = await res.json();
+async function initializeApp() {
+  try {
+    const response = await fetch('zonas_densidad.geojson');
+    
+    if (!response.ok) {
+      throw new Error(`Error HTTP: ${response.status}`);
+    }
+    
+    geoJsonData = await response.json();
 
-  build_stats(geojson);
-  update_leyenda(currentPalette);
-  build_map(geojson, currentPalette);
-  setupToggle();
+    renderStatistics(geoJsonData);
+    updateLegend(currentPaletteKey);
+    buildMap(geoJsonData, currentPaletteKey);
+    setupPaletteToggle();
 
-  document.getElementById('loading').classList.add('hidden');
+    // document.getElementById('loading').classList.add('hidden');
+    
+  } catch (error) {
+    console.error("Error al cargar los datos del mapa:", error);
+  }
 }
 
-window.addEventListener('DOMContentLoaded', init);
+window.addEventListener('DOMContentLoaded', initializeApp);
