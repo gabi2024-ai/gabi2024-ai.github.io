@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Densidad Urbana · Gran Santiago</title>
+<title>Densidad Relativa Urbana · Gran Santiago</title>
 <script src="https://cdn.plot.ly/plotly-3.4.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
 <link href="styles.css" rel="stylesheet" />
 
 </head>
@@ -12,7 +13,7 @@
 <div id="app">
 
   <div id="topbar">
-    <h1>Densidad Tráfico Urbano · <span>Gran Santiago</span></h1>
+    <h1>Densidad Relativa Urbana · <span>Gran Santiago</span></h1>
 
     <div class="stats-row">
       <div class="stat-pill">
@@ -25,7 +26,7 @@
       </div>
       <div class="stat-pill">
         <span class="val" id="s-max">—</span>
-        <span class="lbl">máx zonas/km²</span>
+        <span class="lbl">máx relativo</span>
       </div>
       <div class="stat-pill">
         <span class="val" id="s-avg">—</span>
@@ -33,27 +34,63 @@
       </div>
     </div>
 
-    <button id="toggle-palette" title="Alternar paleta para daltonismo">
-      <div class="palette-swatch" id="swatch-preview"></div>
-      Paleta daltonismo
-    </button>
+    <div class="top-actions">
+      <button id="toggle-palette" title="Alternar paleta para daltonismo">
+        <div class="palette-swatch" id="swatch-preview"></div>
+        Paleta daltonismo
+      </button>
+      <button id="toggle-sound" title="Activar sonificación">
+        Sonificación
+      </button>
+    </div>
   </div>
 
 
   <div id="map-wrap">
     <div id="map"></div>
 
+    <div id="story-panel">
+      <div class="story-kicker">Hallazgo principal</div>
+      <div class="story-title">El centro compacto concentra las zonas más pequeñas</div>
+      <div class="story-text" id="story-text">—</div>
+      <div class="story-note">La métrica no representa habitantes/km²: indica cuántas zonas censales equivalentes caben en un km².</div>
+    </div>
+
+    <div id="filter-panel">
+      <div class="filter-title">Explorar por intensidad</div>
+      <div class="filter-actions">
+        <button class="filter-btn active" data-filter="all">Todas</button>
+        <button class="filter-btn" data-filter="high">Alta</button>
+        <button class="filter-btn" data-filter="medium">Media</button>
+        <button class="filter-btn" data-filter="low">Baja</button>
+      </div>
+      <div class="filter-status" id="filter-status">Vista general completa</div>
+    </div>
+
+    <div id="ranking-panel">
+      <div class="rank-title">Comunas destacadas</div>
+      <div id="ranking-list"></div>
+    </div>
+
+    <div class="map-note note-center">Centro compacto</div>
+    <div class="map-note note-edge">Periferia con zonas extensas</div>
+
     <div id="hover-panel">
       <div class="hp-title" id="hp-name">—</div>
       <div class="hp-row">
-        <span class="hp-label">Densidad</span>
+        <span class="hp-label">Densidad rel.</span>
         <span class="hp-value" id="hp-dens">—</span>
       </div>
+      <div class="hp-row">
+        <span class="hp-label">Área estimada</span>
+        <span class="hp-value" id="hp-area">—</span>
+      </div>
+      <div class="hp-caption" id="hp-caption">—</div>
       <div class="hp-geocod" id="hp-geo"></div>
     </div>
 
     <div id="legend">
-      <div class="leg-title">Densidad (zonas/km²)</div>
+      <div class="leg-title">Densidad relativa</div>
       <div class="leg-bar" id="leg-bar"></div>
       <div class="leg-labels">
         <span>0</span>

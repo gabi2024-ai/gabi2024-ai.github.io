@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Densidad Urbana · Gran Santiago</title>
+<script src="https://cdn.plot.ly/plotly-3.4.0.min.js"></script>
+<link href="styles.css" rel="stylesheet" />
+
+</head>
+<body>
+<div id="app">
+
+  <div id="topbar">
+    <h1>Densidad Tráfico Urbano · <span>Gran Santiago</span></h1>
+
+    <div class="stats-row">
+      <div class="stat-pill">
+        <span class="val" id="s-zonas">—</span>
+        <span class="lbl">zonas</span>
+      </div>
+      <div class="stat-pill">
+        <span class="val" id="s-comunas">—</span>
+        <span class="lbl">comunas</span>
+      </div>
+      <div class="stat-pill">
+        <span class="val" id="s-max">—</span>
+        <span class="lbl">máx zonas/km²</span>
+      </div>
+      <div class="stat-pill">
+        <span class="val" id="s-avg">—</span>
+        <span class="lbl">promedio</span>
+      </div>
+    </div>
+
+    <button id="toggle-palette" title="Alternar paleta para daltonismo">
+      <div class="palette-swatch" id="swatch-preview"></div>
+      Paleta daltonismo
+    </button>
+  </div>
+
+
+  <div id="map-wrap">
+    <div id="map"></div>
+
+    <div id="hover-panel">
+      <div class="hp-title" id="hp-name">—</div>
+      <div class="hp-row">
+        <span class="hp-label">Densidad</span>
+        <span class="hp-value" id="hp-dens">—</span>
+      </div>
+      <div class="hp-geocod" id="hp-geo"></div>
+    </div>
+
+    <div id="legend">
+      <div class="leg-title">Densidad (zonas/km²)</div>
+      <div class="leg-bar" id="leg-bar"></div>
+      <div class="leg-labels">
+        <span>0</span>
+        <span>5</span>
+        <span>10</span>
+        <span>20+</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="main.js"></script>
+</body>
+</html>

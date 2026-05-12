@@ -45,22 +45,9 @@ const PALETTES = {
   },
 };
 
-const FILTERS = {
-  all: { name: 'Vista general completa', min: 0, max: Infinity },
-  high: { name: 'Zonas de densidad relativa alta', min: 10, max: Infinity },
-  medium: { name: 'Zonas de densidad relativa media', min: 5, max: 10 },
-  low: { name: 'Zonas de densidad relativa baja', min: 0, max: 5 },
-};
 
 let currentPaletteKey = 'default';
-let currentFilterKey = 'all';
-let currentCommuneName = null;
 let geoJsonData = null;
-let mapGeoJsonData = null;
-let soundEnabled = false;
-let audioStarted = false;
-let densitySynth = null;
-let lastSoundTime = 0;
 
 // utils
 function interpolateColor(targetValue, palette) {
@@ -111,74 +98,6 @@ function calculateCentroid(feature) {
   };
 }
 
-function getDensityCategory(density) {
-  if (density >= 10) return 'alta';
-  if (density >= 5) return 'media';
-  return 'baja';
-}
-
-function getDensityCaption(density) {
-  const category = getDensityCategory(density);
-
-  if (category === 'alta') {
-    return 'Zona pequeña y concentrada: mayor fragmentación espacial dentro del tejido urbano.';
-  }
-
-  if (category === 'media') {
-    return 'Zona intermedia: permite comparar la transición entre sectores compactos y extensos.';
-  }
-
-  return 'Zona extensa: menor densidad relativa de zonas censales dentro del mapa urbano.';
-}
-
-function getEstimatedArea(density) {
-  if (!density || density <= 0) return null;
-  return 1 / density;
-}
-
-function getFeaturesByFilter() {
-  const features = geoJsonData.features;
-
-  if (currentCommuneName) {
-    return features.filter(feature => feature.properties.nombre_comuna === currentCommuneName);
-  }
-
-  const filter = FILTERS[currentFilterKey];
-  return features.filter(feature => {
-    const density = feature.properties.densidad;
-    return density >= filter.min && density < filter.max;
-  });
-}
-
-function getCommuneSummary(geoJson) {
-  const summary = {};
-
-  geoJson.features.forEach(feature => {
-    const name = feature.properties.nombre_comuna;
-    const density = feature.properties.densidad;
-    const area = getEstimatedArea(density);
-
-    if (!summary[name]) {
-      summary[name] = { name, densities: [], areas: [] };
-    }
-
-    summary[name].densities.push(density);
-    if (area) summary[name].areas.push(area);
-  });
-
-  return Object.values(summary).map(item => {
-    const avgDensity = item.densities.reduce((a, b) => a + b, 0) / item.densities.length;
-    const avgArea = item.areas.reduce((a, b) => a + b, 0) / item.areas.length;
-
-    return {
-      name: item.name,
-      zones: item.densities.length,
-      avgDensity,
-      avgArea,
-    };
-  });
-}
-
 // update de la interfaz
 function renderStatistics(geoJson) {
   const densities = geoJson.features.map(feature => feature.properties.densidad);
@@ -193,31 +112,6 @@ function renderStatistics(geoJson) {
   document.getElementById('s-avg').textContent = averageDensity.toFixed(2);
 }
 
-function renderStoryPanel(geoJson) {
-  const densities = geoJson.features.map(feature => feature.properties.densidad);
-  const highDensityZones = densities.filter(density => density >= 10).length;
-  const highDensityPercent = (highDensityZones / densities.length) * 100;
-
-  document.getElementById('story-text').textContent = `En la vista general, ${highDensityZones.toLocaleString('es-CL')} zonas (${highDensityPercent.toFixed(1)}%) superan el umbral alto. La interacción permite aislar esos sectores y comparar el patrón central con la periferia.`;
-}
-
-function renderRanking(geoJson) {
-  const ranking = getCommuneSummary(geoJson)
-    .sort((a, b) => b.avgDensity - a.avgDensity)
-    .slice(0, 5);
-
-  const rankingList = document.getElementById('ranking-list');
-  rankingList.innerHTML = ranking
-    .map((item, index) => `
-      <button class="rank-item" data-commune="${item.name}">
-        <span class="rank-pos">${index + 1}</span>
-        <span class="rank-name">${item.name}</span>
-        <span class="rank-value">${item.avgDensity.toFixed(1)}</span>
-      </button>
-    `)
-    .join('');
-}
-
 function updateLegend(paletteKey) {
   const palette = PALETTES[paletteKey];
   
@@ -227,20 +121,6 @@ function updateLegend(paletteKey) {
   swatchContainer.innerHTML = palette.preview
     .map(color => `<div class="swatch-dot" style="background:${color}"></div>`)
     .join('');
-}
-
-function updateFilterButtons() {
-  const buttons = document.querySelectorAll('.filter-btn');
-
-  buttons.forEach(button => {
-    button.classList.toggle('active', button.dataset.filter === currentFilterKey && currentCommuneName === null);
-  });
-
-  const status = currentCommuneName
-    ? `Comuna seleccionada: ${currentCommuneName}`
-    : FILTERS[currentFilterKey].name;
-
-  document.getElementById('filter-status').textContent = status;
 }
 
 function buildMap(geoJson, paletteKey) {
@@ -258,8 +138,6 @@ function buildMap(geoJson, paletteKey) {
   clonedGeoJson.features.forEach((feature, index) => { 
     feature.id = index; 
   });
-
-  mapGeoJsonData = clonedGeoJson;
 
   // etiquetas por comuna
   const communeDataMap = {};
@@ -293,23 +171,6 @@ function buildMap(geoJson, paletteKey) {
   });
 
   // --- Configuración de Trazos de Plotly ---
-  const baseTrace = {
-    type: 'choroplethmapbox',
-    geojson: clonedGeoJson,
-    locations: ids,
-    z: ids.map(() => 1),
-    colorscale: [[0.00, '#191625'], [1.00, '#191625']],
-    zmin: 0,
-    zmax: 1,
-    marker: {
-      opacity: 0.28,
-      line: { width: 0.2, color: 'rgba(255,255,255,0.10)' }
-    },
-    hoverinfo: 'skip',
-    showscale: false,
-    name: '',
-  };
-
   const mapTrace = {
     type: 'choroplethmapbox',
     geojson: clonedGeoJson,
@@ -319,11 +180,11 @@ function buildMap(geoJson, paletteKey) {
     zmin: 0,
     zmax: MAX_DENSITY,
     marker: {
-      opacity: 0.88,
+      opacity: 0.85,
       line: { width: 0.4, color: 'rgba(255,255,255,0.25)' }
     },
     colorbar: {
-      title: { text: 'valor relativo', font: { family: 'JetBrains Mono', size: 9, color: '#7c7a8e' }, side: 'right' },
+      title: { text: 'zonas/km²', font: { family: 'JetBrains Mono', size: 9, color: '#7c7a8e' }, side: 'right' },
       thickness: 10,
       len: 0.55,
       x: 1.01,
@@ -375,8 +236,8 @@ function buildMap(geoJson, paletteKey) {
   };
 
   // Renderizar
-  Plotly.newPlot('map', [baseTrace, mapTrace], mapLayout, mapConfig);
-  // Plotly.newPlot('map', [baseTrace, mapTrace, etiquetas], mapLayout, mapConfig);
+  Plotly.newPlot('map', [mapTrace], mapLayout, mapConfig);
+  // Plotly.newPlot('map', [mapTrace, etiquetas], mapLayout, mapConfig);
 
   setupMapInteractions();
 }
@@ -395,16 +256,12 @@ function setupMapInteractions() {
     if (!point || point.customdata === undefined) return;
     
     const [commune, geocode, density] = point.customdata;
-    const area = getEstimatedArea(density);
     
     document.getElementById('hp-name').textContent = commune;
-    document.getElementById('hp-dens').textContent = density.toFixed(3);
-    document.getElementById('hp-area').textContent = area ? `${area.toFixed(3)} km²` : '—';
-    document.getElementById('hp-caption').textContent = getDensityCaption(density);
+    document.getElementById('hp-dens').textContent = `${density.toFixed(3)} zonas/km²`;
     document.getElementById('hp-geo').textContent = geocode;
     
     hoverPanel.classList.add('visible');
-    playDensitySound(density);
   });
 
   mapElement.on('plotly_unhover', () => {
@@ -424,107 +281,13 @@ function setupPaletteToggle() {
   });
 }
 
-function setupSoundToggle() {
-  const toggleButton = document.getElementById('toggle-sound');
-
-  toggleButton.addEventListener('click', async () => {
-    soundEnabled = !soundEnabled;
-
-    if (soundEnabled && window.Tone && !audioStarted) {
-      await Tone.start();
-      densitySynth = new Tone.Synth({
-        oscillator: { type: 'sine' },
-        envelope: { attack: 0.01, decay: 0.08, sustain: 0.12, release: 0.16 }
-      }).toDestination();
-      audioStarted = true;
-    }
-
-    toggleButton.classList.toggle('active', soundEnabled);
-    toggleButton.textContent = soundEnabled ? 'Sonificación activa' : 'Sonificación';
-  });
-}
-
-function setupDensityFilters() {
-  const buttons = document.querySelectorAll('.filter-btn');
-
-  buttons.forEach(button => {
-    button.addEventListener('click', () => {
-      currentFilterKey = button.dataset.filter;
-      currentCommuneName = null;
-      updateFilterButtons();
-      updateMapFilter();
-    });
-  });
-}
-
-function setupRankingInteractions() {
-  const rankingList = document.getElementById('ranking-list');
-
-  rankingList.addEventListener('click', event => {
-    const button = event.target.closest('.rank-item');
-    if (!button) return;
-
-    currentCommuneName = button.dataset.commune;
-    currentFilterKey = 'all';
-    updateFilterButtons();
-    updateMapFilter();
-
-    const features = getFeaturesByFilter();
-    const densities = features.map(feature => feature.properties.densidad);
-    const avgDensity = densities.reduce((sum, value) => sum + value, 0) / densities.length;
-    playDensitySound(avgDensity);
-  });
-}
-
 function updateMapTracePalette(paletteKey) {
   const palette = PALETTES[paletteKey];
   
   Plotly.restyle('map', {
     colorscale: [palette.scale],
     zmax: [MAX_DENSITY],
-  }, [1]);
-}
-
-function updateMapFilter() {
-  const features = getFeaturesByFilter();
-  const ids = features.map(feature => geoJsonData.features.indexOf(feature));
-  const communeNames = features.map(feature => feature.properties.nombre_comuna);
-  const geocodes = features.map(feature => feature.properties.geocodigo);
-  const densities = features.map(feature => feature.properties.densidad);
-
-  Plotly.restyle('map', {
-    locations: [ids],
-    z: [densities],
-    customdata: [communeNames.map((name, index) => [name, geocodes[index], densities[index]])],
-  }, [1]);
-}
-
-function getSoundConfig(density) {
-  const normalized = Math.max(0, Math.min(density / MAX_DENSITY, 1));
-  const frequency = 170 + normalized * 720;
-  const category = getDensityCategory(density);
-
-  if (category === 'alta') {
-    return { frequency, duration: '16n', type: 'triangle' };
-  }
-
-  if (category === 'media') {
-    return { frequency, duration: '8n', type: 'sine' };
-  }
-
-  return { frequency, duration: '4n', type: 'sine' };
-}
-
-function playDensitySound(density) {
-  if (!soundEnabled || !audioStarted || !densitySynth) return;
-
-  const now = Date.now();
-  if (now - lastSoundTime < 180) return;
-
-  const config = getSoundConfig(density);
-  densitySynth.oscillator.type = config.type;
-  densitySynth.triggerAttackRelease(config.frequency, config.duration);
-  lastSoundTime = now;
+  }, [0]);
 }
 
 async function initializeApp() {
@@ -538,15 +301,9 @@ async function initializeApp() {
     geoJsonData = await response.json();
 
     renderStatistics(geoJsonData);
-    renderStoryPanel(geoJsonData);
-    renderRanking(geoJsonData);
     updateLegend(currentPaletteKey);
     buildMap(geoJsonData, currentPaletteKey);
     setupPaletteToggle();
-    setupSoundToggle();
-    setupDensityFilters();
-    setupRankingInteractions();
-    updateFilterButtons();
 
     // document.getElementById('loading').classList.add('hidden');
     
