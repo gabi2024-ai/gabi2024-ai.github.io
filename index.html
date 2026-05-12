@@ -3,17 +3,17 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Densidad Relativa Urbana · Gran Santiago</title>
+<title>Densidad Relativa de Zonas · Gran Santiago</title>
 <script src="https://cdn.plot.ly/plotly-3.4.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
-<link href="styles.css?v=2" rel="stylesheet" />
+<link href="styles.css?v=3" rel="stylesheet" />
 
 </head>
 <body>
 <div id="app">
 
   <div id="topbar">
-    <h1>Densidad Relativa Urbana · <span>Gran Santiago</span></h1>
+    <h1>Densidad Relativa de Zonas · <span>Gran Santiago</span></h1>
 
     <div class="stats-row">
       <div class="stat-pill">
@@ -26,7 +26,7 @@
       </div>
       <div class="stat-pill">
         <span class="val" id="s-max">—</span>
-        <span class="lbl">máx relativo</span>
+        <span class="lbl">máx real</span>
       </div>
       <div class="stat-pill">
         <span class="val" id="s-avg">—</span>
@@ -53,7 +53,7 @@
       <div class="story-kicker">Hallazgo principal</div>
       <div class="story-title">El centro compacto concentra las zonas más pequeñas</div>
       <div class="story-text" id="story-text">—</div>
-      <div class="story-note">La métrica no representa habitantes/km²: indica cuántas zonas censales equivalentes caben en un km².</div>
+      <div class="story-note">La métrica no representa habitantes/km². La escala visual se satura desde 20+ para que los valores extremos no oculten el patrón general.</div>
     </div>
 
     <div id="filter-panel">
@@ -90,7 +90,7 @@
     </div>
 
     <div id="legend">
-      <div class="leg-title">Densidad relativa</div>
+      <div class="leg-title">Escala visual 0 a 20+</div>
       <div class="leg-bar" id="leg-bar"></div>
       <div class="leg-labels">
         <span>0</span>
@@ -102,6 +102,6 @@
   </div>
 </div>
 
-<script src="main.js?v=2"></script>
+<script src="main.js?v=3"></script>
 </body>
 </html>
