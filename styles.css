@@ -136,7 +136,7 @@ html, body {
 #story-panel {
   position: absolute;
   top: 24px;
-  right: 28px;
+  right: 96px;
   width: 340px;
   background: rgba(14, 13, 26, 0.96);
   border: 1px solid var(--border);
@@ -228,7 +228,7 @@ html, body {
 
 #ranking-panel {
   position: absolute;
-  right: 28px;
+  right: 96px;
   bottom: 28px;
   width: 340px;
   background: rgba(14, 13, 26, 0.96);
@@ -394,7 +394,7 @@ html, body {
 
 @media (max-width: 980px) {
   #topbar { height: auto; padding: 10px 16px; }
-  #story-panel, #ranking-panel { width: 300px; right: 20px; }
+  #story-panel, #ranking-panel { width: 300px; right: 72px; }
   #filter-panel, #hover-panel, #legend { left: 20px; }
   .stats-row { order: 3; flex-basis: 100%; }
 }
